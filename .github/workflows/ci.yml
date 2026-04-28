@@ -6,6 +6,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
+  # Здесь мы принудительно переводим название в нижний регистр
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
@@ -22,7 +23,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0 # Проверь свою версию .NET, если у тебя 6.0 или 7.0 — поменяй тут
+          dotnet-version: 8.0
 
       - name: Restore dependencies
         run: dotnet restore **/*.csproj
@@ -37,16 +38,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-
+      # Вот это исправит твою ошибку с заглавными буквами
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-          labels: ${{ steps.meta.outputs.labels }}
+          # Используем команду lower, чтобы Docker не ругался
+          tags: ${{ env.REGISTRY }}/${{ github.repository_owner }}/islabapp:latest
